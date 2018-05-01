@@ -21,7 +21,7 @@ public class JDBCStudentsDAO extends JDBCAbstractDAO implements StudentsDAO {
     }
 
     @Override
-    public Iterable<Students> getStudents() throws SQLException {
+    public List<Students> getStudents() throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM students")) {
             try (ResultSet set =  stmnt.executeQuery()) {
                 List<Students> students = new ArrayList<>();

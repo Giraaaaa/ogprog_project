@@ -7,10 +7,11 @@ package databank.database_algemeen;
 import databank.db_objects.Location;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface LocationDAO {
 
-    Iterable<Location> getLocations() throws SQLException;
+    List<Location> getLocations() throws SQLException;
 
     Location findLocationByName(String name) throws SQLException;
 

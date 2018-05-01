@@ -111,12 +111,12 @@
               <MenuItem mnemonicParsing="false" text="Teacher" onAction="#teacherPopup" />
                   <MenuItem mnemonicParsing="false" text="Students" onAction="#studentsPopup" />
                   <MenuItem mnemonicParsing="false" text="Location" onAction="#locationPopup" />
-                  <MenuItem mnemonicParsing="false" text="Lecture"  />
+                  <MenuItem mnemonicParsing="false" text="Lecture" onAction="#lecturePopup"  />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Help">
+          <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem mnemonicParsing="false" text="Lecture" onAction="#editLecture" />
             </items>
           </Menu>
         </menus>

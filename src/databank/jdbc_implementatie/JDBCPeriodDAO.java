@@ -21,7 +21,7 @@ public class JDBCPeriodDAO extends JDBCAbstractDAO implements PeriodDAO {
     }
 
     @Override
-    public Iterable<Period> getPeriods() throws SQLException {
+    public List<Period> getPeriods() throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM period ORDER BY hour, minute ASC")) {
             try (ResultSet set =  stmnt.executeQuery()) {
                 List<Period> periods = new ArrayList<>();

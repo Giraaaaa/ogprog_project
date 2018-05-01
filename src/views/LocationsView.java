@@ -6,19 +6,17 @@ import javafx.beans.Observable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.util.StringConverter;
-import models.LocationsModel;
-
-import java.sql.SQLException;
+import models.Model;
 
 public class LocationsView extends ListView<Location> implements InvalidationListener {
 
-    private LocationsModel model;
+    private Model model;
 
-    public LocationsModel getModel() {
+    public Model getModel() {
         return model;
     }
 
-    public void setModel(LocationsModel model) {
+    public void setModel(Model model) {
         this.model = model;
         model.addListener(this);
         setItems(model.getLocations());

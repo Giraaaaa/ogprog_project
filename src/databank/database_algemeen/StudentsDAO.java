@@ -7,10 +7,11 @@ package databank.database_algemeen;
 import databank.db_objects.Students;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface StudentsDAO {
 
-    Iterable<Students> getStudents() throws SQLException;
+    List<Students> getStudents() throws SQLException;
 
     Students findStudentsByName(String name) throws SQLException;
 

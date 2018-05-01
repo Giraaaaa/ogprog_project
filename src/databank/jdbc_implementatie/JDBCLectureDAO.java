@@ -22,7 +22,7 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
 
 
     @Override
-    public Iterable<Lecture> getLectures() throws SQLException {
+    public List<Lecture> getLectures() throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM lecture")) {
             try (ResultSet set =  stmnt.executeQuery()) {
                 List<Lecture> lectures = new ArrayList<>();
@@ -44,7 +44,7 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
     }
 
     @Override
-    public Iterable<Lecture> getLectureByLocationid(int id) throws SQLException {
+    public List<Lecture> getLectureByLocationid(int id) throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM lecture WHERE location_id = ?")) {
             stmnt.setInt(1, id);
             ResultSet result = stmnt.executeQuery();
@@ -53,7 +53,7 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
     }
 
     @Override
-    public Iterable<Lecture> getLecturesByStudentsid(int id) throws SQLException {
+    public List<Lecture> getLecturesByStudentsid(int id) throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM lecture WHERE students_id = ?")) {
             stmnt.setInt(1, id);
             ResultSet result = stmnt.executeQuery();
@@ -62,14 +62,14 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
     }
 
     @Override
-    public Iterable<Lecture> getLecturesByTeacherid(int id) throws SQLException {
+    public List<Lecture> getLecturesByTeacherid(int id) throws SQLException {
         try(PreparedStatement stmnt = prepare("SELECT * FROM lecture WHERE teacher_id = ?")) {
             stmnt.setInt(1, id);
             ResultSet result = stmnt.executeQuery();
             return resultSetToList(result);
         }
     }
-    public Iterable<Lecture> resultSetToList(ResultSet result) throws SQLException {
+    public List<Lecture> resultSetToList(ResultSet result) throws SQLException {
         List<Lecture> lessen = new ArrayList<>();
         while (result.next()) {
             lessen.add(new Lecture(
@@ -85,7 +85,6 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
     }
 
     @Override
-    // Returns the id of the created lecture.
     public void createLecture(int students_id, int teacher_id, int location_id, String course, int day, int first_block, int duration) throws SQLException {
         try (PreparedStatement stmnt = prepare("INSERT INTO lecture(students_id, teacher_id, location_id, course, day, first_block, duration) VALUES (?,?,?,?,?,?,?)")) {
             stmnt.setInt(1, students_id);
@@ -96,6 +95,22 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
             stmnt.setInt(6, first_block);
             stmnt.setInt(7, duration);
             stmnt.executeUpdate();
+        }
+    }
+
+    // Wordt gebruikt om te checken of lectures uniek zijn
+    public boolean findLecture(int students_id, int teacher_id, int location_id, String course, int day, int first_block, int duration) throws SQLException {
+        try (PreparedStatement stmnt = prepare("SELECT * FROM lecture WHERE students_id = ? AND teacher_id = ? AND location_id = ? AND course = ? AND day = ? AND first_block = ? AND duration = ?")) {
+            stmnt.setInt(1, students_id);
+            stmnt.setInt(2, teacher_id);
+            stmnt.setInt(3, location_id);
+            stmnt.setString(4, course);
+            stmnt.setInt(5, day);
+            stmnt.setInt(6, first_block);
+            stmnt.setInt(7, duration);
+            ResultSet rs = stmnt.executeQuery();
+            // Return false wanneer er geen rijen zitten in de resultset en true wanneer er wel rijen/ of 1 rij inzitten.
+            return rs.isBeforeFirst();
         }
     }
 }

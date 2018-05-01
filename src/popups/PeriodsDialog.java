@@ -81,6 +81,15 @@ public class PeriodsDialog extends Dialog {
                 minutenveld.setStyle("-fx-text-inner-color: red");
                 warning.setVisible(true);
             } else {
+                // Voor we de periode kunnen toevoegen moeten we eerst checken of ze uniek is.
+                for (Period periode : periodes) {
+                    // In dit geval is de periode niet uniek
+                    if (uur == periode.getHour() && minuten == periode.getMinute()) {
+                        warning.setText("Periode bestaat al");
+                        warning.setVisible(true);
+                        return;
+                    }
+                }
                 try (DataAccessContext dac = dap.getDataAccessContext()) {
                     PeriodDAO dao = dac.getPeriodDAO();
                     int id = dao.createPeriod(uur, minuten);
@@ -91,6 +100,8 @@ public class PeriodsDialog extends Dialog {
                 uurveld.setStyle(null);
                 minutenveld.setStyle(null);
                 warning.setVisible(false);
+                // In het geval dat de text op de warning veranderd was
+                warning.setText("onmogelijk tijdstip.");
                 periodesview.setItems(periodes);
             }
         }

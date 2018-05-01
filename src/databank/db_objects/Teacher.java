@@ -24,6 +24,10 @@ public class Teacher {
         return name;
     }
 
+    public void setName(String updated) {
+        name = updated;
+    }
+
     @Override
     public String toString() {
         return name;

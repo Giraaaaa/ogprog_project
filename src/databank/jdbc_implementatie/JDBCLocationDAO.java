@@ -21,7 +21,7 @@ public class JDBCLocationDAO extends JDBCAbstractDAO implements LocationDAO {
     }
 
     @Override
-    public Iterable<Location> getLocations() throws SQLException {
+    public List<Location> getLocations() throws SQLException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM location")) {
             try (ResultSet set =  stmnt.executeQuery()) {
                 List<Location> locations = new ArrayList<>();

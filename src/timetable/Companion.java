@@ -7,6 +7,7 @@ package timetable;
 import databank.db_objects.Lecture;
 import databank.db_objects.Period;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
+import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
@@ -17,9 +18,8 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import models.LocationsModel;
-import models.StudentsModel;
-import models.TeachersModel;
+import models.Model;
+import popups.LectureAddDialog;
 import popups.PeriodsDialog;
 import views.LocationsView;
 import views.StudentsView;
@@ -36,44 +36,39 @@ public class Companion {
     public GridPane grid;
     public Accordion acc;
     public TeachersView teachers;
-    private TeachersModel teachersmodel;
     public StudentsView students;
-    private StudentsModel studentsmodel;
     public LocationsView locations;
-    private LocationsModel locationsmodel;
+    private Model model;
     public MenuItem choose;
-    private Keuzelijsten keuzes = new Keuzelijsten();
     private int rows;
     private int columns;
-    // This list contains all of the lectures that are in the grid at the moment
+    // Deze lijst bevat alle nodes van de gridpane, zodat we deze makkelijk weer kunnen deleten wanneer nodig.
     private List<Label> currentlist;
-    //This boolean indicates if there is already a file selected, if not, we cannot add any teachers, ... to the file.
+    //Deze boolean houdt bij of er al een bestand geselecteerd is, dit moeten we checken omdat we anders geen teachers, ... kunnen adden.
     private boolean fileselected;
 
     public void initialize() {
         grid.setVisible(false);
         currentlist = new ArrayList<>();
+        model = new Model();
         teachers.getSelectionModel().selectedItemProperty().addListener(
                 obj -> teacherChange() //Listener
         );
-        teachersmodel = new TeachersModel();
-        teachers.setModel(teachersmodel);
+        teachers.setModel(model);
         locations.getSelectionModel().selectedItemProperty().addListener(
                 obj -> locationChange() //Listener
         );
-        locationsmodel = new LocationsModel();
-        locations.setModel(locationsmodel);
+        locations.setModel(model);
         students.getSelectionModel().selectedItemProperty().addListener(
                 obj -> studentsChange() // Listener
         );
-        studentsmodel = new StudentsModel();
-        students.setModel(studentsmodel);
+        students.setModel(model);
 
     }
 
     private void teacherChange() {
         try {
-            List<Lecture> lessen = keuzes.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
+            List<Lecture> lessen = model.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
             updateRooster(lessen);
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
@@ -82,7 +77,7 @@ public class Companion {
 
     private void locationChange() {
         try {
-            List<Lecture> lessen = keuzes.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
+            List<Lecture> lessen = model.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
             updateRooster(lessen);
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
@@ -91,7 +86,7 @@ public class Companion {
 
     private void studentsChange() {
         try {
-            List<Lecture> lessen = keuzes.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
+            List<Lecture> lessen = model.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
             updateRooster(lessen);
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
@@ -100,7 +95,7 @@ public class Companion {
 
     public void initializeRooster() throws SQLException {
         grid.setVisible(true);
-        List<Period> periodes = keuzes.givePeriodsList();
+        List<Period> periodes = model.getPeriods();
         rows = periodes.size();
         // We have 5 days in a schoolweek + 1 column for the times
         columns = 6;
@@ -132,7 +127,7 @@ public class Companion {
                 int lessons_on_this_hour = 0;
                 String labelstring = "";
                 for (Lecture lecture : lijst) {
-                    if (lecture.getDay() == i && (lecture.getFirst_block() == j || lecture.getFirst_block() + lecture.getDuration() - 1 == j)) {
+                    if (lecture.getDay() == i && (lecture.getFirst_block() <= j && j <= lecture.getFirst_block() + lecture.getDuration() - 1)) {
                         labelstring = labelstring + lecture + "\n";
                         lessons_on_this_hour += 1;
                     }
@@ -168,9 +163,9 @@ public class Companion {
 
             // We passen de JDBC_connectiestring aan zodat we met de geselecteerde databank kunnen verbinden.
             new JDBCDataAccessProvider().editURL(file.getAbsolutePath());
-            teachersmodel.populate();
-            locationsmodel.populate();
-            studentsmodel.populate();
+            model.populateLocation();
+            model.populateStudents();
+            model.populateTeacher();
             initializeRooster();
             fileselected = true;
         }
@@ -204,7 +199,7 @@ public class Companion {
             dialog.setContentText("Name:");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                studentsmodel.addStudents(naam.get());
+                model.addStudents(naam.get());
             }
         }
     }
@@ -217,7 +212,7 @@ public class Companion {
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                teachersmodel.addTeacher(naam.get());
+                model.addTeacher(naam.get());
             }
         }
     }
@@ -230,8 +225,20 @@ public class Companion {
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                locationsmodel.addLocation(naam.get());
+                model.addLocation(naam.get());
             }
+        }
+    }
+
+    public void lecturePopup() throws SQLException {
+        if (fileselected) {
+            new LectureAddDialog(model, FXCollections.observableArrayList(model.getPeriods()));
+        }
+    }
+
+    public void editLecture() throws SQLException {
+        if (fileselected) {
+
         }
     }
 }

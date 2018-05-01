@@ -6,17 +6,17 @@ import javafx.beans.Observable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.util.StringConverter;
-import models.StudentsModel;
+import models.Model;
 
 public class StudentsView extends ListView<Students> implements InvalidationListener {
 
-    private StudentsModel model;
+    private Model model;
 
-    public StudentsModel getModel() {
+    public Model getModel() {
         return model;
     }
 
-    public void setModel(StudentsModel model) {
+    public void setModel(Model model) {
         this.model = model;
         model.addListener(this);
         setItems(model.getStudents());
