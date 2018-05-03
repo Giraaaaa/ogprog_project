@@ -101,13 +101,27 @@ public class LectureEditDialog extends Dialog {
     public void edited() {
         // We verwijderen de lecture en voegen hem dan weer toe met de updated data,
         // dit voorkomt problemen met primary keys
-        model.removeLecture(lectures.getSelectionModel().getSelectedItem());
-        model.addLecture(new Lecture(studentsComboBox.getSelectionModel().getSelectedItem().getId(), teacherComboBox.getSelectionModel().getSelectedItem().getId(), locationComboBox.getSelectionModel().getSelectedItem().getId(), coursefield.getText(), dayComboBox.getSelectionModel().getSelectedIndex() + 1, periodComboBox.getSelectionModel().getSelectedItem().getId(), durationspinner.getValue()));
+        if (lectures.getSelectionModel().getSelectedItem() != null) {
+            model.removeLecture(lectures.getSelectionModel().getSelectedItem());
+            model.addLecture(new Lecture(studentsComboBox.getSelectionModel().getSelectedItem().getId(), teacherComboBox.getSelectionModel().getSelectedItem().getId(), locationComboBox.getSelectionModel().getSelectedItem().getId(), coursefield.getText(), dayComboBox.getSelectionModel().getSelectedIndex() + 1, periodComboBox.getSelectionModel().getSelectedItem().getId(), durationspinner.getValue()));
+        }
+        else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("No lecture selected");
+            alert.show();
+        }
 
     }
 
     public void remove() {
-        model.removeLecture(lectures.getSelectionModel().getSelectedItem());
+        if (lectures.getSelectionModel().getSelectedItem() != null) {
+            model.removeLecture(lectures.getSelectionModel().getSelectedItem());
+        }
+        else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("No lecture selected");
+            alert.show();
+        }
         close();
     }
 

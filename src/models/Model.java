@@ -45,6 +45,8 @@ public class Model implements Observable {
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de locaties in te laden.
     public void populateLocation() throws SQLException {
+        // eerst maken we de huidige leeg omdat die uit de vorige db komen
+        locations.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LocationDAO dao = dac.getLocationDAO();
             Iterable<Location> locaties = dao.getLocations();
@@ -106,6 +108,7 @@ public class Model implements Observable {
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de studenten in te laden.
     public void populateStudents() throws SQLException {
+        students.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             StudentsDAO dao = dac.getStudentsDAO();
             Iterable<Students> studenten = dao.getStudents();
@@ -143,6 +146,7 @@ public class Model implements Observable {
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de teachers in te laden.
     public void populateTeacher() throws SQLException {
+        teachers.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             TeacherDAO dao = dac.getTeacherDAO();
             Iterable<Teacher> leerkrachten = dao.getTeachers();
@@ -187,6 +191,16 @@ public class Model implements Observable {
             PeriodDAO dao = dac.getPeriodDAO();
             List<Period> periods = dao.getPeriods();
             return periods;
+        }
+    }
+
+    public int createPeriod(int uur, int minuten) {
+        try (DataAccessContext dac = dap.getDataAccessContext()) {
+            PeriodDAO dao = dac.getPeriodDAO();
+            int id = dao.createPeriod(uur, minuten);
+            return id;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Could not create period.");
         }
     }
 

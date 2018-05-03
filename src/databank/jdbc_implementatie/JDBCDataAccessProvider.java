@@ -31,8 +31,11 @@ public class JDBCDataAccessProvider implements DataAccessProvider {
     }
 
     public void editURL(String filepath) {
-        JDBC_URL = JDBC_URL + filepath;
+
+        String temp = "jdbc:sqlite:";
+        JDBC_URL = temp + filepath;
     }
+
     // Methode die alle nodige tabellen aanmaakt in de databank.
     public void createDataBase() throws SQLException {
         Connection conn = getConnection();

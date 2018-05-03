@@ -13,12 +13,15 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
+import models.Model;
 
 import java.sql.SQLException;
 
 public class PeriodsDialog extends Dialog {
 
     private DataAccessProvider dap = new JDBCDataAccessProvider();
+
+    private Model model;
 
     private TextField uurveld;
     private Label uurlabel;
@@ -34,7 +37,8 @@ public class PeriodsDialog extends Dialog {
     // De lijst waarin de periodes komen die worden toegevoegd.
     private ObservableList<Period> periodes;
 
-    public PeriodsDialog() {
+    public PeriodsDialog(Model model) {
+        this.model = model;
         // Voegt een verborgen close-button toe, zodat de dialog wel kan gesloten worden via het kruisje.
         getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         Node closeButton = getDialogPane().lookupButton(ButtonType.CLOSE);
@@ -90,13 +94,9 @@ public class PeriodsDialog extends Dialog {
                         return;
                     }
                 }
-                try (DataAccessContext dac = dap.getDataAccessContext()) {
-                    PeriodDAO dao = dac.getPeriodDAO();
-                    int id = dao.createPeriod(uur, minuten);
-                    periodes.add(new Period(id, uur, minuten));
-                } catch (SQLException ex) {
-                    throw new RuntimeException("Could not create period.");
-                }
+
+                int id = model.createPeriod(uur, minuten);
+                periodes.add(new Period(id, uur, minuten));
                 uurveld.setStyle(null);
                 minutenveld.setStyle(null);
                 warning.setVisible(false);

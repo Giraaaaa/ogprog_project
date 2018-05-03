@@ -4,15 +4,11 @@
 
 package timetable;
 
-import databank.db_objects.Lecture;
-import databank.db_objects.Period;
+import databank.db_objects.*;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
@@ -69,8 +65,10 @@ public class Companion {
 
     private void teacherChange() {
         try {
-            List<Lecture> lessen = model.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
-            updateRooster(lessen);
+            if (teachers.getSelectionModel().getSelectedItem() != null) {
+                List<Lecture> lessen = model.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
+                updateRooster(lessen);
+            }
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
         }
@@ -78,8 +76,10 @@ public class Companion {
 
     private void locationChange() {
         try {
-            List<Lecture> lessen = model.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
-            updateRooster(lessen);
+            if (locations.getSelectionModel().getSelectedItem() != null) {
+                List<Lecture> lessen = model.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
+                updateRooster(lessen);
+            }
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
         }
@@ -87,14 +87,21 @@ public class Companion {
 
     private void studentsChange() {
         try {
-            List<Lecture> lessen = model.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
-            updateRooster(lessen);
+            if (students.getSelectionModel().getSelectedItem() != null) {
+                List<Lecture> lessen = model.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
+                updateRooster(lessen);
+            }
         } catch (SQLException ex) {
             throw new RuntimeException("Something went wrong");
         }
     }
 
     public void initializeRooster() throws SQLException {
+        // We verwijderen eerst alle dingen die de oude databank in de grid had gezet
+        grid.getRowConstraints().remove(1, grid.getRowConstraints().size());
+        for (Label label : currentlist) {
+            grid.getChildren().remove(label);
+        }
         grid.setVisible(true);
         List<Period> periodes = model.getPeriods();
         rows = periodes.size();
@@ -188,7 +195,7 @@ public class Companion {
             new JDBCDataAccessProvider().editURL(file.getAbsolutePath());
             // We initialiseren alle nodige tables in de databank.
             new JDBCDataAccessProvider().createDataBase();
-            new PeriodsDialog();
+            new PeriodsDialog(model);
             initializeRooster();
             fileselected = true;
         }
@@ -202,7 +209,18 @@ public class Companion {
             dialog.setContentText("Name:");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                model.addStudents(naam.get());
+                boolean uniek = true;
+                for (Students students : model.getStudents()) {
+                    if (naam.get().equals(students.getName())) {
+                        uniek = false;
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setHeaderText("Student group already in database");
+                        alert.show();
+                    }
+                }
+                if (uniek) {
+                    model.addStudents(naam.get());
+                }
             }
         }
     }
@@ -215,7 +233,19 @@ public class Companion {
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                model.addTeacher(naam.get());
+                // Checken of deze naam uniek is
+                boolean uniek = true;
+                for (Teacher teacher : model.getTeachers()) {
+                    if (naam.get().equals(teacher.getName())) {
+                        uniek = false;
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setHeaderText("Teacher already in database");
+                        alert.show();
+                    }
+                }
+                if (uniek) {
+                    model.addTeacher(naam.get());
+                }
             }
         }
     }
@@ -228,7 +258,18 @@ public class Companion {
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
             if (naam.isPresent()) {
-                model.addLocation(naam.get());
+                boolean uniek = true;
+                for (Location location : model.getLocations()) {
+                    if (naam.get().equals(location.getName())) {
+                        uniek = false;
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setHeaderText("Location already in database");
+                        alert.show();
+                    }
+                }
+                if (uniek) {
+                    model.addLocation(naam.get());
+                }
             }
         }
     }
