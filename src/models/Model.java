@@ -92,11 +92,13 @@ public class Model implements Observable {
         fireInvalidationEvent();
     }
 
-    public void addLecture(Lecture les) throws SQLException {
+    public void addLecture(Lecture les) {
         // Voegt een nieuwe les toe aan de db.
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             dao.createLecture(les.getStudent_id(), les.getTeacher_id(), les.getLocation_id(), les.getCourse(), les.getDay(), les.getFirst_block(), les.getDuration());
+        } catch (SQLException ex) {
+            throw new RuntimeException("Could not add lecture");
         }
 
     }
@@ -213,10 +215,24 @@ public class Model implements Observable {
         }
     }
 
-    public List<Lecture> getCurrentLectures() {return lessen; }
+    public ObservableList<Lecture> getCurrentLectures() {return FXCollections.observableArrayList(lessen); }
+
+
+    public void removeLecture(Lecture lecture) {
+        try (DataAccessContext dac = dap.getDataAccessContext()) {
+            LectureDAO dao = dac.getLectureDAO();
+            dao.removeLecture(lecture.getStudent_id(), lecture.getTeacher_id(), lecture.getLocation_id(), lecture.getCourse(), lecture.getDay(), lecture.getFirst_block(), lecture.getDuration());
+        } catch (SQLException ex) {
+            throw new RuntimeException("Unable to remove lecture");
+        }
+    }
 
     // Deze methode update de huidige lectures, wordt opgeroepen wanneer er een nieuwe teachers/location/students wordt geselecteerd
     public void updateLectures(List<Lecture> lectures) {
         lessen = new ArrayList<>(lectures);
+    }
+
+    public void editURL(String path) {
+        dap.editURL(path);
     }
 }

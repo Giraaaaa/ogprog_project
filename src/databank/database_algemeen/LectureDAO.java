@@ -23,5 +23,7 @@ public interface LectureDAO {
 
     boolean findLecture(int students_id, int teacher_id, int location_id, String course, int day, int first_block, int duration) throws SQLException;
 
+    void removeLecture(int students_id, int teacher_id, int location_id, String course, int day, int first_block, int duration) throws SQLException;
+
     
 }

@@ -20,6 +20,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Model;
 import popups.LectureAddDialog;
+import popups.LectureEditDialog;
 import popups.PeriodsDialog;
 import views.LocationsView;
 import views.StudentsView;
@@ -116,6 +117,8 @@ public class Companion {
     }
 
     public void updateRooster(List<Lecture> lijst) {
+        // Eerst updaten we het model.
+        model.updateLectures(lijst);
         // First we remove all lessons that are currently in the grid.
         for (Label label : currentlist) {
             grid.getChildren().remove(label);
@@ -162,7 +165,7 @@ public class Companion {
         if (file != null) {
 
             // We passen de JDBC_connectiestring aan zodat we met de geselecteerde databank kunnen verbinden.
-            new JDBCDataAccessProvider().editURL(file.getAbsolutePath());
+            model.editURL(file.getAbsolutePath());
             model.populateLocation();
             model.populateStudents();
             model.populateTeacher();
@@ -238,7 +241,7 @@ public class Companion {
 
     public void editLecture() throws SQLException {
         if (fileselected) {
-
+            new LectureEditDialog(model);
         }
     }
 }

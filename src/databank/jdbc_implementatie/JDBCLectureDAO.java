@@ -113,4 +113,19 @@ public class JDBCLectureDAO extends JDBCAbstractDAO implements LectureDAO {
             return rs.isBeforeFirst();
         }
     }
+
+    public void removeLecture(int students_id, int teacher_id, int location_id, String course, int day, int first_block, int duration) throws SQLException {
+        try (PreparedStatement stmnt = prepare("DELETE FROM lecture WHERE students_id = ? AND teacher_id = ? AND location_id = ? AND course = ? AND day = ? AND first_block = ? AND duration = ?")) {
+            stmnt.setInt(1, students_id);
+            stmnt.setInt(2, teacher_id);
+            stmnt.setInt(3, location_id);
+            stmnt.setString(4, course);
+            stmnt.setInt(5, day);
+            stmnt.setInt(6, first_block);
+            stmnt.setInt(7, duration);
+            stmnt.executeUpdate();
+        } catch (SQLException ex) {
+            throw new SQLException("Could not remove lecture");
+        }
+    }
 }

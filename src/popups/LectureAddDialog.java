@@ -86,23 +86,20 @@ public class LectureAddDialog extends Dialog {
             int day = dayComboBox.getSelectionModel().getSelectedIndex() + 1;
             int firstblock = periodComboBox.getSelectionModel().getSelectedItem().getId();
             int duration = durationspinner.getValue();
+            les = new Lecture(studentsid, teacherid, locationid, course, day, firstblock, duration);
             if (course.isEmpty() || day == 0) {
                 alert.show();
             }
-            if (duration > periodComboBox.getItems().size() - (periodComboBox.getItems().indexOf(periodComboBox.getSelectionModel().getSelectedItem()) + 1)) {
+            else if (duration > periodComboBox.getItems().size() - (periodComboBox.getItems().indexOf(periodComboBox.getSelectionModel().getSelectedItem()) + 1)) {
                 // In dit geval heeft de gebruiker een onmogelijke duration ogegeven.
                 Alert telang = new Alert(Alert.AlertType.ERROR, "Duration cannot be this long", ButtonType.CLOSE);
                 alert.setHeaderText("Cannot add lecture");
                 telang.show();
             }
-            les = new Lecture(studentsid, teacherid, locationid, course, day, firstblock, duration);
             // Kijken of deze les nog niet in de db zit.
-            if (model.uniquelecture(les)) {
-                try {
+            else if (model.uniquelecture(les)) {
                     model.addLecture(les);
-                } catch (SQLException ex) {
-                    throw new RuntimeException("Cannot add lecture");
-                }
+                    close();
             }
             else {
                 Alert nietuniek = new Alert(Alert.AlertType.ERROR, "Deze les is zit al in de databank", ButtonType.CLOSE);
