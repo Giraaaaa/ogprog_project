@@ -1,3 +1,7 @@
+/*
+@author Sieben Veldeman
+ */
+
 package popups;
 
 import databank.db_objects.*;
@@ -90,7 +94,7 @@ public class LectureAddDialog extends Dialog {
             if (course.isEmpty() || day == 0) {
                 alert.show();
             }
-            else if (duration > periodComboBox.getItems().size() - (periodComboBox.getItems().indexOf(periodComboBox.getSelectionModel().getSelectedItem()) + 1)) {
+            else if (periodComboBox.getItems().indexOf(periodComboBox.getSelectionModel().getSelectedItem()) + duration > periodComboBox.getItems().size()) {
                 // In dit geval heeft de gebruiker een onmogelijke duration ogegeven.
                 Alert telang = new Alert(Alert.AlertType.ERROR, "Duration cannot be this long", ButtonType.CLOSE);
                 alert.setHeaderText("Cannot add lecture");

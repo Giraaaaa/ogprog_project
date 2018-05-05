@@ -1,3 +1,7 @@
+/*
+@author Sieben Veldeman
+ */
+
 package models;
 
 import databank.database_algemeen.*;
@@ -62,7 +66,14 @@ public class Model implements Observable {
     public void updateLocation(Location loc) {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LocationDAO dao = dac.getLocationDAO();
+            // Pas de location aan in de db
             dao.updateLocation(loc.getName(), loc.getId());
+            // Pas de location aan in het model
+            for (Location location : locations) {
+                if (location.getId() == loc.getId()) {
+                    location.setName(loc.getName());
+                }
+            }
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to update location.");
         }
@@ -102,7 +113,7 @@ public class Model implements Observable {
         } catch (SQLException ex) {
             throw new RuntimeException("Could not add lecture");
         }
-
+        fireInvalidationEvent();
     }
 
 
@@ -239,14 +250,21 @@ public class Model implements Observable {
         } catch (SQLException ex) {
             throw new RuntimeException("Unable to remove lecture");
         }
+        fireInvalidationEvent();
     }
 
     // Deze methode update de huidige lectures, wordt opgeroepen wanneer er een nieuwe teachers/location/students wordt geselecteerd
     public void updateLectures(List<Lecture> lectures) {
         lessen = new ArrayList<>(lectures);
+        fireInvalidationEvent();
     }
 
     public void editURL(String path) {
+        // Als we de URL moeten aanpassen, betekent het dat we een nieuwe db moeten openen en mogen we de oude data dus weggooien
+        teachers.clear();
+        locations.clear();
+        students.clear();
         dap.editURL(path);
+        fireInvalidationEvent();
     }
 }

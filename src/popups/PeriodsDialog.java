@@ -1,3 +1,7 @@
+/*
+@author Sieben Veldeman
+ */
+
 package popups;
 
 
@@ -8,6 +12,8 @@ import databank.db_objects.Period;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -15,11 +21,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import models.Model;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
 public class PeriodsDialog extends Dialog {
-
-    private DataAccessProvider dap = new JDBCDataAccessProvider();
 
     private Model model;
 
@@ -39,11 +45,6 @@ public class PeriodsDialog extends Dialog {
 
     public PeriodsDialog(Model model) {
         this.model = model;
-        // Voegt een verborgen close-button toe, zodat de dialog wel kan gesloten worden via het kruisje.
-        getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        Node closeButton = getDialogPane().lookupButton(ButtonType.CLOSE);
-        closeButton.managedProperty().bind(closeButton.visibleProperty());
-        closeButton.setVisible(false);
         setTitle("Add a period");
         // Label en een textfields toevoegen, om periodes te inputten
         GridPane grid = new GridPane();
@@ -67,6 +68,10 @@ public class PeriodsDialog extends Dialog {
         grid.add(box, 0, 1);
         grid.add(periodesview, 0, 0);
         grid.add(warning, 0, 2);
+        Button closeknop = new Button();
+        closeknop.setText("Close");
+        closeknop.setOnMouseClicked(eh -> sluit());
+        grid.add(closeknop, 0, 3);
         getDialogPane().setContent(grid);
         showAndWait();
     }
@@ -104,6 +109,20 @@ public class PeriodsDialog extends Dialog {
                 warning.setText("onmogelijk tijdstip.");
                 periodesview.setItems(periodes);
             }
+        }
+    }
+
+    public void sluit() {
+        if (periodes.size() < 1) {
+            Alert nietgenoeg = new Alert(Alert.AlertType.ERROR);
+            nietgenoeg.setHeaderText("No periods specified");
+            nietgenoeg.show();
+        }
+        else {
+            // We moeten een dummy closebutton toevoegen omdat javafx design dit vraagt, we kunnen anders niet programmatisch
+            // de dialoog sluiten.
+            getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            close();
         }
     }
 }

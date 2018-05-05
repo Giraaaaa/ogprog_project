@@ -1,3 +1,7 @@
+/*
+@author Sieben Veldeman
+ */
+
 package popups;
 
 
@@ -102,8 +106,16 @@ public class LectureEditDialog extends Dialog {
         // We verwijderen de lecture en voegen hem dan weer toe met de updated data,
         // dit voorkomt problemen met primary keys
         if (lectures.getSelectionModel().getSelectedItem() != null) {
-            model.removeLecture(lectures.getSelectionModel().getSelectedItem());
-            model.addLecture(new Lecture(studentsComboBox.getSelectionModel().getSelectedItem().getId(), teacherComboBox.getSelectionModel().getSelectedItem().getId(), locationComboBox.getSelectionModel().getSelectedItem().getId(), coursefield.getText(), dayComboBox.getSelectionModel().getSelectedIndex() + 1, periodComboBox.getSelectionModel().getSelectedItem().getId(), durationspinner.getValue()));
+            Lecture les = new Lecture(studentsComboBox.getSelectionModel().getSelectedItem().getId(), teacherComboBox.getSelectionModel().getSelectedItem().getId(), locationComboBox.getSelectionModel().getSelectedItem().getId(), coursefield.getText(), dayComboBox.getSelectionModel().getSelectedIndex() + 1, periodComboBox.getSelectionModel().getSelectedItem().getId(), durationspinner.getValue());
+            // Als de les niet uniek is, mogen we ze niet aanpassen
+            if (model.uniquelecture(les)) {
+                model.removeLecture(lectures.getSelectionModel().getSelectedItem());
+                model.addLecture(les);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Edited lecture already in database");
+                alert.show();
+            }
         }
         else {
             Alert alert = new Alert(Alert.AlertType.ERROR);

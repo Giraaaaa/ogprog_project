@@ -1,8 +1,10 @@
 package views;
 
+import databank.db_objects.Location;
 import databank.db_objects.Students;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -35,15 +37,27 @@ public class StudentsView extends ListView<Students> implements InvalidationList
 
                 @Override
                 public Students fromString(String string) {
-                    if (cell.getItem() != null) {
+                    // We moeten enkel de naam aanpassen als de nieuwe naam uniek is.
+                    boolean uniek = true;
+                    for (Students students : model.getStudents()) {
+                        if (string.equals(students.getName()) && students.getId() != cell.getItem().getId()) {
+                            uniek = false;
+                        }
+                    }
+                    if (cell.getItem() != null && uniek && !string.equals("")) {
                         cell.getItem().setName(string);
                     }
-                    model.updateStudents(cell.getItem());
                     return cell.getItem();
                 }
             };
             cell.setConverter(converter);
             return cell;
+        });
+        setOnEditCommit(new EventHandler<EditEvent<Students>>() {
+            @Override
+            public void handle(EditEvent<Students> event) {
+                model.updateStudents(event.getNewValue());
+            }
         });
     }
 

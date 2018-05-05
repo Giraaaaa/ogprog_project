@@ -6,6 +6,8 @@ package timetable;
 
 import databank.db_objects.*;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -29,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class Companion {
+public class Companion implements InvalidationListener {
     public GridPane grid;
     public Accordion acc;
     public TeachersView teachers;
@@ -105,8 +107,8 @@ public class Companion {
         grid.setVisible(true);
         List<Period> periodes = model.getPeriods();
         rows = periodes.size();
-        // We have 5 days in a schoolweek + 1 column for the times
-        columns = 6;
+        // We have 5 days in a schoolweek;
+        columns = 5;
         // This for-loop adds all the rows to our grid, and also adds labels to display the times
         for (int i = 0; i < rows; i += 1) {
             RowConstraints rowc = new RowConstraints();
@@ -123,6 +125,8 @@ public class Companion {
 
     }
 
+
+
     public void updateRooster(List<Lecture> lijst) {
         // Eerst updaten we het model.
         model.updateLectures(lijst);
@@ -132,8 +136,8 @@ public class Companion {
         }
         currentlist = new ArrayList<>();
         // Add the lectures to be added to the current list, and then to the grid
-        for (int i = 1; i < columns; i += 1) {
-            for (int j = 1; j < rows; j += 1) {
+        for (int i = 1; i <= columns; i += 1) {
+            for (int j = 1; j <= rows; j += 1) {
                 int lessons_on_this_hour = 0;
                 String labelstring = "";
                 for (Lecture lecture : lijst) {
@@ -189,10 +193,10 @@ public class Companion {
         kiesvenster.setX(300);
         kiesvenster.setY(300);
         File file = kiezer.showSaveDialog(kiesvenster);
-        if (file != null) {
+        if (file != null && !file.exists()) {
             grid.setVisible(true);
             // We passen de JDBC_connectiestring aan zodat we met de geselecteerde databank kunnen verbinden.
-            new JDBCDataAccessProvider().editURL(file.getAbsolutePath());
+            model.editURL(file.getAbsolutePath());
             // We initialiseren alle nodige tables in de databank.
             new JDBCDataAccessProvider().createDataBase();
             new PeriodsDialog(model);
@@ -208,7 +212,7 @@ public class Companion {
             dialog.setHeaderText("Enter the name of the group");
             dialog.setContentText("Name:");
             Optional<String> naam = dialog.showAndWait();
-            if (naam.isPresent()) {
+            if (naam.isPresent() && !naam.get().equals("")) {
                 boolean uniek = true;
                 for (Students students : model.getStudents()) {
                     if (naam.get().equals(students.getName())) {
@@ -232,7 +236,7 @@ public class Companion {
             dialog.setHeaderText("Enter the name of the teacher");
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
-            if (naam.isPresent()) {
+            if (naam.isPresent() && !naam.get().equals("")) {
                 // Checken of deze naam uniek is
                 boolean uniek = true;
                 for (Teacher teacher : model.getTeachers()) {
@@ -257,7 +261,7 @@ public class Companion {
             dialog.setHeaderText("Enter the name of the location");
             dialog.setContentText("Name: ");
             Optional<String> naam = dialog.showAndWait();
-            if (naam.isPresent()) {
+            if (naam.isPresent() && !naam.get().equals("")) {
                 boolean uniek = true;
                 for (Location location : model.getLocations()) {
                     if (naam.get().equals(location.getName())) {
@@ -284,5 +288,10 @@ public class Companion {
         if (fileselected) {
             new LectureEditDialog(model);
         }
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        updateRooster(model.getCurrentLectures());
     }
 }
