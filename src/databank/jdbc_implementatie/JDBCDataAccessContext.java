@@ -4,6 +4,7 @@
 
 package databank.jdbc_implementatie;
 
+import databank.DataAccessException;
 import databank.database_algemeen.*;
 
 import java.sql.Connection;
@@ -43,12 +44,12 @@ public class JDBCDataAccessContext implements DataAccessContext {
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() throws DataAccessException {
         try {
             connection.close();
         }
         catch (SQLException ex) {
-            throw new SQLException("Could not close this context.");
+            throw new DataAccessException("Could not close this context.", ex);
         }
     }
 }

@@ -4,7 +4,7 @@
 
 package databank.database_algemeen;
 
-import java.sql.SQLException;
+import databank.DataAccessException;
 
 public interface DataAccessContext extends AutoCloseable {
 
@@ -18,6 +18,6 @@ public interface DataAccessContext extends AutoCloseable {
 
     TeacherDAO getTeacherDAO();
 
-    void close() throws SQLException;
+    void close() throws DataAccessException;
 
 }

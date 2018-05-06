@@ -119,6 +119,11 @@
               <MenuItem mnemonicParsing="false" text="Lecture" onAction="#editLecture" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="About">
+                <items>
+                    <MenuItem mnemonicParsing="false" text="Help" onAction="#helpDialog" />
+                </items>
+            </Menu>
         </menus>
       </MenuBar>
    </top>

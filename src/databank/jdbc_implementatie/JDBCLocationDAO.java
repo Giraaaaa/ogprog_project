@@ -4,6 +4,7 @@
 
 package databank.jdbc_implementatie;
 
+import databank.DataAccessException;
 import databank.database_algemeen.LocationDAO;
 import databank.db_objects.Location;
 
@@ -21,7 +22,7 @@ public class JDBCLocationDAO extends JDBCAbstractDAO implements LocationDAO {
     }
 
     @Override
-    public List<Location> getLocations() throws SQLException {
+    public List<Location> getLocations() throws DataAccessException {
         try (PreparedStatement stmnt = prepare("SELECT * FROM location")) {
             try (ResultSet set =  stmnt.executeQuery()) {
                 List<Location> locations = new ArrayList<>();
@@ -33,11 +34,11 @@ public class JDBCLocationDAO extends JDBCAbstractDAO implements LocationDAO {
                 return locations;
             }
         } catch (SQLException ex) {
-            throw new SQLException("Could not retrieve locations from database.");
+            throw new DataAccessException("Could not retrieve locations from database", ex);
         }
     }
 
-    public Location findLocationByName(String name) throws SQLException {
+    public Location findLocationByName(String name) throws DataAccessException {
         // Deze methode gaat ervan uit dat alle studentengroepen een unieke naam hebben.
         try (PreparedStatement stmnt = prepare("SELECT * FROM location WHERE name = ?")) {
             stmnt.setString(1, name);
@@ -46,13 +47,13 @@ public class JDBCLocationDAO extends JDBCAbstractDAO implements LocationDAO {
                 return opgevraagd;
             }
         } catch (SQLException ex) {
-            throw new SQLException("Could not retrieve location, perhaps you gave a wrong name.");
+            throw new DataAccessException("Could not retrieve location", ex);
         }
 
     }
 
     //Returns the id of the created person
-    public int createLocation(String name) throws SQLException {
+    public int createLocation(String name) throws DataAccessException {
         try (PreparedStatement stmnt = prepare("INSERT INTO location(name) VALUES (?)")) {
             stmnt.setString(1, name);
             stmnt.executeUpdate();
@@ -63,17 +64,17 @@ public class JDBCLocationDAO extends JDBCAbstractDAO implements LocationDAO {
                 throw new SQLException("Invalid generated key.");
             }
         } catch (SQLException ex) {
-            throw new SQLException("Could not create location.");
+            throw new DataAccessException("Could not create location", ex);
         }
     }
 
-    public void updateLocation(String name, int id) throws SQLException {
+    public void updateLocation(String name, int id) throws DataAccessException {
         try (PreparedStatement stmnt = prepare("UPDATE location SET name = ? WHERE id = ?")) {
             stmnt.setString(1, name);
             stmnt.setInt(2, id);
             stmnt.executeUpdate();
         } catch (SQLException ex) {
-            throw new SQLException("Could not update this location.");
+            throw new DataAccessException("Could not update this location", ex);
         }
     }
 }

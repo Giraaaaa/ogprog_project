@@ -4,6 +4,7 @@
 
 package timetable;
 
+import databank.DataAccessException;
 import databank.db_objects.*;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
 import javafx.beans.InvalidationListener;
@@ -17,6 +18,7 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Model;
+import popups.HelpDialog;
 import popups.LectureAddDialog;
 import popups.LectureEditDialog;
 import popups.PeriodsDialog;
@@ -65,40 +67,39 @@ public class Companion implements InvalidationListener {
 
     }
 
-    private void teacherChange() {
-        try {
-            if (teachers.getSelectionModel().getSelectedItem() != null) {
-                List<Lecture> lessen = model.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
-                updateRooster(lessen);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Something went wrong");
+    private void teacherChange()  {
+        if (teachers.getSelectionModel().getSelectedItem() != null) {
+            List<Lecture> lessen = model.giveLectureListByteacherid(teachers.getSelectionModel().getSelectedItem().getId());
+            updateRooster(lessen);
+                    /*
+        We verwijderen telkens de selectie van de andere twee listviews. Dit voorkomt frustrerende bugs waarbij
+        het rooster niet zou updaten wanneer we één element uit een listview selecteren, daarna uit een andere listview
+        en dan weer hetzelfde als het eerste, omdat het eerste in dat geval nog geselecteerd zou zijn, wat niet de bedoeling is
+         */
+            students.getSelectionModel().clearSelection(students.getSelectionModel().getSelectedIndex());
+            locations.getSelectionModel().clearSelection(locations.getSelectionModel().getSelectedIndex());
         }
     }
 
     private void locationChange() {
-        try {
-            if (locations.getSelectionModel().getSelectedItem() != null) {
-                List<Lecture> lessen = model.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
-                updateRooster(lessen);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Something went wrong");
+        if (locations.getSelectionModel().getSelectedItem() != null) {
+            List<Lecture> lessen = model.giveLectureListbyLocationid(locations.getSelectionModel().getSelectedItem().getId());
+            updateRooster(lessen);
+            teachers.getSelectionModel().clearSelection(teachers.getSelectionModel().getSelectedIndex());
+            students.getSelectionModel().clearSelection(students.getSelectionModel().getSelectedIndex());
         }
     }
 
     private void studentsChange() {
-        try {
-            if (students.getSelectionModel().getSelectedItem() != null) {
-                List<Lecture> lessen = model.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
-                updateRooster(lessen);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Something went wrong");
+        if (students.getSelectionModel().getSelectedItem() != null) {
+            List<Lecture> lessen = model.giveLectureListbyStudentsid(students.getSelectionModel().getSelectedItem().getId());
+            updateRooster(lessen);
+            teachers.getSelectionModel().clearSelection(teachers.getSelectionModel().getSelectedIndex());
+            locations.getSelectionModel().clearSelection(locations.getSelectionModel().getSelectedIndex());
         }
     }
 
-    public void initializeRooster() throws SQLException {
+    public void initializeRooster() {
         // We verwijderen eerst alle dingen die de oude databank in de grid had gezet
         grid.getRowConstraints().remove(1, grid.getRowConstraints().size());
         for (Label label : currentlist) {
@@ -130,12 +131,12 @@ public class Companion implements InvalidationListener {
     public void updateRooster(List<Lecture> lijst) {
         // Eerst updaten we het model.
         model.updateLectures(lijst);
-        // First we remove all lessons that are currently in the grid.
+        // Eerst verwijderen we de lessen die van de vorige selectie in de grid stonden.
         for (Label label : currentlist) {
             grid.getChildren().remove(label);
         }
         currentlist = new ArrayList<>();
-        // Add the lectures to be added to the current list, and then to the grid
+        // Voeg de lessen eerst toe aan de currentlist en dan aan de grid.
         for (int i = 1; i <= columns; i += 1) {
             for (int j = 1; j <= rows; j += 1) {
                 int lessons_on_this_hour = 0;
@@ -198,14 +199,14 @@ public class Companion implements InvalidationListener {
             // We passen de JDBC_connectiestring aan zodat we met de geselecteerde databank kunnen verbinden.
             model.editURL(file.getAbsolutePath());
             // We initialiseren alle nodige tables in de databank.
-            new JDBCDataAccessProvider().createDataBase();
+            model.createDataBase();
             new PeriodsDialog(model);
             initializeRooster();
             fileselected = true;
         }
     }
 
-    public void studentsPopup() throws SQLException {
+    public void studentsPopup() {
         if (fileselected) {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add student group");
@@ -229,7 +230,7 @@ public class Companion implements InvalidationListener {
         }
     }
 
-    public void teacherPopup() throws SQLException {
+    public void teacherPopup() {
         if (fileselected) {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add teacher");
@@ -254,7 +255,7 @@ public class Companion implements InvalidationListener {
         }
     }
 
-    public void locationPopup() throws SQLException {
+    public void locationPopup() {
         if (fileselected) {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add location");
@@ -278,7 +279,7 @@ public class Companion implements InvalidationListener {
         }
     }
 
-    public void lecturePopup() throws SQLException {
+    public void lecturePopup() {
         if (fileselected) {
             new LectureAddDialog(model, FXCollections.observableArrayList(model.getPeriods()));
         }
@@ -288,6 +289,10 @@ public class Companion implements InvalidationListener {
         if (fileselected) {
             new LectureEditDialog(model);
         }
+    }
+
+    public void helpDialog() {
+        new HelpDialog();
     }
 
     @Override

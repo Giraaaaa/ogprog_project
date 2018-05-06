@@ -4,6 +4,7 @@
 
 package models;
 
+import databank.DataAccessException;
 import databank.database_algemeen.*;
 import databank.db_objects.*;
 import databank.jdbc_implementatie.JDBCDataAccessProvider;
@@ -12,7 +13,6 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class Model implements Observable {
     }
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de locaties in te laden.
-    public void populateLocation() throws SQLException {
+    public void populateLocation() throws DataAccessException {
         // eerst maken we de huidige leeg omdat die uit de vorige db komen
         locations.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
@@ -63,7 +63,7 @@ public class Model implements Observable {
 
 
     // Methode om een locatie aan te passen in de databank.
-    public void updateLocation(Location loc) {
+    public void updateLocation(Location loc) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LocationDAO dao = dac.getLocationDAO();
             // Pas de location aan in de db
@@ -74,14 +74,12 @@ public class Model implements Observable {
                     location.setName(loc.getName());
                 }
             }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Failed to update location.");
         }
         fireInvalidationEvent();
     }
 
     // Methode om een locatie toe te voegen aan de databank, en aan het model.
-    public void addLocation(String name) throws SQLException {
+    public void addLocation(String name) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LocationDAO dao = dac.getLocationDAO();
             int id = dao.createLocation(name);
@@ -94,7 +92,7 @@ public class Model implements Observable {
         return students;
     }
 
-    public void addStudents(String name) throws SQLException {
+    public void addStudents(String name) throws DataAccessException {
         // Opdracht aan databank om een teacher toe te voegen, die methode geeft automatisch het gecreerde ID terug, waarmee
         // we een nieuw teacher object aan de observablelist kunnen toevoegen.
         try (DataAccessContext dac = dap.getDataAccessContext()) {
@@ -105,20 +103,18 @@ public class Model implements Observable {
         fireInvalidationEvent();
     }
 
-    public void addLecture(Lecture les) {
+    public void addLecture(Lecture les) throws DataAccessException {
         // Voegt een nieuwe les toe aan de db.
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             dao.createLecture(les.getStudent_id(), les.getTeacher_id(), les.getLocation_id(), les.getCourse(), les.getDay(), les.getFirst_block(), les.getDuration());
-        } catch (SQLException ex) {
-            throw new RuntimeException("Could not add lecture");
         }
         fireInvalidationEvent();
     }
 
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de studenten in te laden.
-    public void populateStudents() throws SQLException {
+    public void populateStudents() throws DataAccessException {
         students.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             StudentsDAO dao = dac.getStudentsDAO();
@@ -130,12 +126,10 @@ public class Model implements Observable {
         fireInvalidationEvent();
     }
 
-    public void updateStudents(Students students) {
+    public void updateStudents(Students students) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             StudentsDAO dao = dac.getStudentsDAO();
             dao.updateStudents(students.getName(), students.getId());
-        } catch (SQLException ex) {
-            throw new RuntimeException("Failed to update location.");
         }
         fireInvalidationEvent();
     }
@@ -144,7 +138,7 @@ public class Model implements Observable {
         return teachers;
     }
 
-    public void addTeacher(String name) throws SQLException {
+    public void addTeacher(String name) throws DataAccessException {
         // Opdracht aan databank om een teacher toe te voegen, die methode geeft automatisch het gecreerde ID terug, waarmee
         // we een nieuw teacher object aan de observablelist kunnen toevoegen.
         try (DataAccessContext dac = dap.getDataAccessContext()) {
@@ -156,7 +150,7 @@ public class Model implements Observable {
     }
 
     // Wanneer we een bestaande db openen, wordt deze methode opgeroepen om de teachers in te laden.
-    public void populateTeacher() throws SQLException {
+    public void populateTeacher() throws DataAccessException {
         teachers.clear();
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             TeacherDAO dao = dac.getTeacherDAO();
@@ -168,17 +162,15 @@ public class Model implements Observable {
         fireInvalidationEvent();
     }
 
-    public void updateTeacher(Teacher teacher) {
+    public void updateTeacher(Teacher teacher) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             TeacherDAO dao = dac.getTeacherDAO();
             dao.updateTeacher(teacher.getName(), teacher.getId());
-        } catch (SQLException ex) {
-            throw new RuntimeException("Failed to update teachers.");
         }
         fireInvalidationEvent();
     }
 
-    public void populateLecture() throws SQLException {
+    public void populateLecture() throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             Iterable<Lecture> lectures = dao.getLectures();
@@ -188,16 +180,14 @@ public class Model implements Observable {
         }
     }
 
-    public boolean uniquelecture(Lecture lecture) {
+    public boolean uniquelecture(Lecture lecture) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             return ! dao.findLecture(lecture.getStudent_id(), lecture.getTeacher_id(), lecture.getLocation_id(), lecture.getCourse(), lecture.getDay(), lecture.getFirst_block(), lecture.getDuration());
-        } catch (SQLException ex) {
-            return true;
         }
     }
 
-    public List<Period> getPeriods() throws SQLException {
+    public List<Period> getPeriods() throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             PeriodDAO dao = dac.getPeriodDAO();
             List<Period> periods = dao.getPeriods();
@@ -205,18 +195,16 @@ public class Model implements Observable {
         }
     }
 
-    public int createPeriod(int uur, int minuten) {
+    public int createPeriod(int uur, int minuten) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             PeriodDAO dao = dac.getPeriodDAO();
             int id = dao.createPeriod(uur, minuten);
             return id;
-        } catch (SQLException ex) {
-            throw new RuntimeException("Could not create period.");
         }
     }
 
     // De volgende methodes vragen de betrokken lessen aan de DAO's aan de hand van de id's
-    public List<Lecture> giveLectureListByteacherid(int id) throws SQLException {
+    public List<Lecture> giveLectureListByteacherid(int id) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             List<Lecture> lessen = dao.getLecturesByTeacherid(id);
@@ -224,7 +212,7 @@ public class Model implements Observable {
         }
     }
 
-    public List<Lecture> giveLectureListbyStudentsid(int id) throws SQLException {
+    public List<Lecture> giveLectureListbyStudentsid(int id) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             List<Lecture> lessen = dao.getLecturesByStudentsid(id);
@@ -232,7 +220,7 @@ public class Model implements Observable {
         }
     }
 
-    public List<Lecture> giveLectureListbyLocationid(int id) throws SQLException {
+    public List<Lecture> giveLectureListbyLocationid(int id) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             List<Lecture> lessen = dao.getLectureByLocationid(id);
@@ -243,12 +231,10 @@ public class Model implements Observable {
     public ObservableList<Lecture> getCurrentLectures() {return FXCollections.observableArrayList(lessen); }
 
 
-    public void removeLecture(Lecture lecture) {
+    public void removeLecture(Lecture lecture) throws DataAccessException {
         try (DataAccessContext dac = dap.getDataAccessContext()) {
             LectureDAO dao = dac.getLectureDAO();
             dao.removeLecture(lecture.getStudent_id(), lecture.getTeacher_id(), lecture.getLocation_id(), lecture.getCourse(), lecture.getDay(), lecture.getFirst_block(), lecture.getDuration());
-        } catch (SQLException ex) {
-            throw new RuntimeException("Unable to remove lecture");
         }
         fireInvalidationEvent();
     }
@@ -259,6 +245,7 @@ public class Model implements Observable {
         fireInvalidationEvent();
     }
 
+    // De volgende twee methodes staan in het model zodat we in het hele programma maar één variabele dap nodig hebben
     public void editURL(String path) {
         // Als we de URL moeten aanpassen, betekent het dat we een nieuwe db moeten openen en mogen we de oude data dus weggooien
         teachers.clear();
@@ -266,5 +253,9 @@ public class Model implements Observable {
         students.clear();
         dap.editURL(path);
         fireInvalidationEvent();
+    }
+
+    public void createDataBase() {
+        dap.createDataBase();
     }
 }

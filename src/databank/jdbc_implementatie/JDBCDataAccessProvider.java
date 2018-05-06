@@ -4,6 +4,7 @@
 
 package databank.jdbc_implementatie;
 
+import databank.DataAccessException;
 import databank.database_algemeen.DataAccessContext;
 import databank.database_algemeen.DataAccessProvider;
 
@@ -17,12 +18,12 @@ public class JDBCDataAccessProvider implements DataAccessProvider {
     private static String JDBC_URL = "jdbc:sqlite:";
 
     @Override
-    public DataAccessContext getDataAccessContext() throws SQLException{
+    public DataAccessContext getDataAccessContext() throws DataAccessException {
         try {
             return new JDBCDataAccessContext(getConnection());
         }
         catch (SQLException ex) {
-            throw new SQLException("Could not create DataAccessContext");
+            throw new DataAccessException("Could not create DataAccessContext", ex);
         }
     }
 
@@ -37,17 +38,21 @@ public class JDBCDataAccessProvider implements DataAccessProvider {
     }
 
     // Methode die alle nodige tabellen aanmaakt in de databank.
-    public void createDataBase() throws SQLException {
-        Connection conn = getConnection();
-        PreparedStatement stmnt = conn.prepareStatement("create table period   (\"id\" integer primary key, \"hour\", \"minute\");");
-        stmnt.executeUpdate();
-        stmnt = conn.prepareStatement("create table students (\"id\" integer primary key, \"name\");");
-        stmnt.executeUpdate();
-        stmnt = conn.prepareStatement("create table teacher  (\"id\" integer primary key, \"name\");");
-        stmnt.executeUpdate();
-        stmnt = conn.prepareStatement("create table location (\"id\" integer primary key, \"name\");");
-        stmnt.executeUpdate();
-        stmnt = conn.prepareStatement("create table lecture  (\"students_id\", \"teacher_id\", \"location_id\", \"course\", \"day\", \"first_block\", \"duration\");");
-        stmnt.executeUpdate();
+    public void createDataBase() throws DataAccessException {
+        try {
+            Connection conn = getConnection();
+            PreparedStatement stmnt = conn.prepareStatement("create table period   (\"id\" integer primary key, \"hour\", \"minute\");");
+            stmnt.executeUpdate();
+            stmnt = conn.prepareStatement("create table students (\"id\" integer primary key, \"name\");");
+            stmnt.executeUpdate();
+            stmnt = conn.prepareStatement("create table teacher  (\"id\" integer primary key, \"name\");");
+            stmnt.executeUpdate();
+            stmnt = conn.prepareStatement("create table location (\"id\" integer primary key, \"name\");");
+            stmnt.executeUpdate();
+            stmnt = conn.prepareStatement("create table lecture  (\"students_id\", \"teacher_id\", \"location_id\", \"course\", \"day\", \"first_block\", \"duration\");");
+            stmnt.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not initialize this database", ex);
+        }
     }
 }

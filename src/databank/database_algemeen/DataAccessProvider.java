@@ -4,16 +4,17 @@
 
 package databank.database_algemeen;
 
-import java.sql.Connection;
+import databank.DataAccessException;
+
 import java.sql.SQLException;
 
 public interface DataAccessProvider {
 
-    DataAccessContext getDataAccessContext() throws SQLException;
+    DataAccessContext getDataAccessContext() throws DataAccessException;
 
     void editURL(String filepath);
 
-    void createDataBase() throws SQLException;
+    void createDataBase() throws DataAccessException;
 
 
 

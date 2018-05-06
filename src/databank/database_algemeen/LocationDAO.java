@@ -4,19 +4,19 @@
 
 package databank.database_algemeen;
 
+import databank.DataAccessException;
 import databank.db_objects.Location;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface LocationDAO {
 
-    List<Location> getLocations() throws SQLException;
+    List<Location> getLocations() throws DataAccessException;
 
-    Location findLocationByName(String name) throws SQLException;
+    Location findLocationByName(String name) throws DataAccessException;
 
-    int createLocation(String name) throws SQLException;
+    int createLocation(String name) throws DataAccessException;
 
-    void updateLocation(String name, int id) throws SQLException;
+    void updateLocation(String name, int id) throws DataAccessException;
 
 }

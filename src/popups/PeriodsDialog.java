@@ -112,7 +112,7 @@ public class PeriodsDialog extends Dialog {
         }
     }
 
-    public void sluit() {
+    private void sluit() {
         if (periodes.size() < 1) {
             Alert nietgenoeg = new Alert(Alert.AlertType.ERROR);
             nietgenoeg.setHeaderText("No periods specified");

@@ -1,3 +1,7 @@
+/*
+@author Sieben Veldeman
+ */
+
 package views;
 
 import databank.db_objects.Teacher;
